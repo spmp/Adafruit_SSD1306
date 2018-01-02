@@ -128,11 +128,11 @@ class Adafruit_SSD1306 : public Adafruit_GFX {
 //   Adafruit_SSD1306(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS);
 //   Adafruit_SSD1306(int8_t DC, int8_t RST, int8_t CS);
 //   Adafruit_SSD1306(int8_t RST = -1);
-//   Adafruit_SSD1306(
-//     TwoWire & wire,
-//     uint8_t deviceID, 
-//     int8_t RST
-//   );
+  Adafruit_SSD1306(
+    TwoWire & wire,
+    uint8_t deviceID, 
+    int8_t RST
+  );
   Adafruit_SSD1306(
     uint8_t deviceID,
     int8_t RST
@@ -162,7 +162,7 @@ class Adafruit_SSD1306 : public Adafruit_GFX {
 
  private:
   uint8_t* buffer;
-//   TwoWire & _Wire;
+  TwoWire & _Wire;
   int8_t 
     _i2caddr, _vccstate, sid, sclk, dc, rst, cs;
   const uint8_t

@@ -30,9 +30,9 @@ All text above, and the splash screen below must be included in any redistributi
 
 #include <stdlib.h>
 
-#include <Wire.h>
-#include <SPI.h>
-#include "Adafruit_GFX.h"
+// #include <Wire.h>
+// #include <SPI.h>
+// #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
 
 // the memory buffer for the LCD
@@ -194,20 +194,20 @@ uint8_t Adafruit_SSD1306::findPageEndCommand(uint8_t deviceInt) {
   }
 }
 
-// Adafruit_SSD1306::Adafruit_SSD1306(TwoWire & wire, uint8_t deviceID, int8_t reset) :
-//   Adafruit_GFX(findWidth(deviceID), findHeight(deviceID)),
-// //   _Wire (wire),
-//   _SSD1306_DisplayCommand (findPageEndCommand(deviceID)),
-//   _deviceID (deviceID),
-//   buffer(new uint8_t[(findWidth(deviceID)*findHeight(deviceID)/8)])
-// {
-//   sclk = dc = cs = sid = -1;
-//   rst = reset;
-// }
+Adafruit_SSD1306::Adafruit_SSD1306(TwoWire & wire, uint8_t deviceID, int8_t reset) :
+  Adafruit_GFX(findWidth(deviceID), findHeight(deviceID)),
+  _Wire (wire),
+  _SSD1306_DisplayCommand (findPageEndCommand(deviceID)),
+  _deviceID (deviceID),
+  buffer(new uint8_t[(findWidth(deviceID)*findHeight(deviceID)/8)])
+{
+  sclk = dc = cs = sid = -1;
+  rst = reset;
+}
 
 Adafruit_SSD1306::Adafruit_SSD1306(uint8_t deviceID, int8_t reset) :
   Adafruit_GFX(findWidth(deviceID), findHeight(deviceID)),
-//   _Wire (Wire),
+  _Wire (Wire),
   _SSD1306_DisplayCommand (findPageEndCommand(deviceID)),
   _deviceID (deviceID),
   buffer(new uint8_t[(findWidth(deviceID)*findHeight(deviceID)/8)])
@@ -222,61 +222,61 @@ void Adafruit_SSD1306::begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   _i2caddr = i2caddr;
   
 /** SPI/I2C etc shuld not be the concern of this library! **/
-  // set pin directions
-  if (sid != -1){
-    pinMode(dc, OUTPUT);
-    pinMode(cs, OUTPUT);
-#ifdef HAVE_PORTREG
-    csport      = portOutputRegister(digitalPinToPort(cs));
-    cspinmask   = digitalPinToBitMask(cs);
-    dcport      = portOutputRegister(digitalPinToPort(dc));
-    dcpinmask   = digitalPinToBitMask(dc);
-#endif
-    if (!hwSPI){
-      // set pins for software-SPI
-      pinMode(sid, OUTPUT);
-      pinMode(sclk, OUTPUT);
-#ifdef HAVE_PORTREG
-      clkport     = portOutputRegister(digitalPinToPort(sclk));
-      clkpinmask  = digitalPinToBitMask(sclk);
-      mosiport    = portOutputRegister(digitalPinToPort(sid));
-      mosipinmask = digitalPinToBitMask(sid);
-#endif
-      }
-    if (hwSPI){
-      SPI.begin();
-#ifdef SPI_HAS_TRANSACTION
-      SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
-#else
-      SPI.setClockDivider (4);
-#endif
-    }
-  }
-  else
-  {
-    // I2C Init
-    Wire.begin(0,4,100000);
-#ifdef __SAM3X8E__
-    // Force 400 KHz I2C, rawr! (Uses pins 20, 21 for SDA, SCL)
-    TWI1->TWI_CWGR = 0;
-    TWI1->TWI_CWGR = ((VARIANT_MCK / (2 * 400000)) - 4) * 0x101;
-#endif
-  }
-  if ((reset) && (rst >= 0)) {
-    // Setup reset pin direction (used by both SPI and I2C)
-    pinMode(rst, OUTPUT);
-    digitalWrite(rst, HIGH);
-    // VDD (3.3V) goes high at start, lets just chill for a ms
-    delay(1);
-    // bring reset low
-    digitalWrite(rst, LOW);
-    // wait 10ms
-    delay(10);
-    // bring out of reset
-    digitalWrite(rst, HIGH);
-    // turn on VCC (9V?)
-  }
-//   Wire.begin(0,4,100000);
+//   // set pin directions
+//   if (sid != -1){
+//     pinMode(dc, OUTPUT);
+//     pinMode(cs, OUTPUT);
+// #ifdef HAVE_PORTREG
+//     csport      = portOutputRegister(digitalPinToPort(cs));
+//     cspinmask   = digitalPinToBitMask(cs);
+//     dcport      = portOutputRegister(digitalPinToPort(dc));
+//     dcpinmask   = digitalPinToBitMask(dc);
+// #endif
+//     if (!hwSPI){
+//       // set pins for software-SPI
+//       pinMode(sid, OUTPUT);
+//       pinMode(sclk, OUTPUT);
+// #ifdef HAVE_PORTREG
+//       clkport     = portOutputRegister(digitalPinToPort(sclk));
+//       clkpinmask  = digitalPinToBitMask(sclk);
+//       mosiport    = portOutputRegister(digitalPinToPort(sid));
+//       mosipinmask = digitalPinToBitMask(sid);
+// #endif
+//       }
+//     if (hwSPI){
+//       SPI.begin();
+// #ifdef SPI_HAS_TRANSACTION
+//       SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
+// #else
+//       SPI.setClockDivider (4);
+// #endif
+//     }
+//   }
+//   else
+//   {
+//     // I2C Init
+//     _Wire.begin(0,4,100000);
+// #ifdef __SAM3X8E__
+//     // Force 400 KHz I2C, rawr! (Uses pins 20, 21 for SDA, SCL)
+//     TWI1->TWI_CWGR = 0;
+//     TWI1->TWI_CWGR = ((VARIANT_MCK / (2 * 400000)) - 4) * 0x101;
+// #endif
+//   }
+//   if ((reset) && (rst >= 0)) {
+//     // Setup reset pin direction (used by both SPI and I2C)
+//     pinMode(rst, OUTPUT);
+//     digitalWrite(rst, HIGH);
+//     // VDD (3.3V) goes high at start, lets just chill for a ms
+//     delay(1);
+//     // bring reset low
+//     digitalWrite(rst, LOW);
+//     // wait 10ms
+//     delay(10);
+//     // bring out of reset
+//     digitalWrite(rst, HIGH);
+//     // turn on VCC (9V?)
+//   }
+  _Wire.begin(0,4,100000);
 
   // Init sequence
   ssd1306_command(SSD1306_DISPLAYOFF);                    // 0xAE
@@ -375,10 +375,10 @@ void Adafruit_SSD1306::ssd1306_command(uint8_t c) {
   {
     // I2C
     uint8_t control = 0x00;   // Co = 0, D/C = 0
-    Wire.beginTransmission(_i2caddr);
-    Wire.write(control);
-    Wire.write(c);
-    Wire.endTransmission();
+    _Wire.beginTransmission(_i2caddr);
+    _Wire.write(control);
+    _Wire.write(c);
+    _Wire.endTransmission();
   }
 }
 
@@ -517,14 +517,14 @@ void Adafruit_SSD1306::display(void) {
     // I2C
     for (uint16_t i=0; i<(WIDTH*HEIGHT/8); i++) {
       // send a bunch of data in one xmission
-      Wire.beginTransmission(_i2caddr);
+      _Wire.beginTransmission(_i2caddr);
       WIRE_WRITE(0x40);
       for (uint8_t x=0; x<16; x++) {
         WIRE_WRITE(buffer[i]);
         i++;
       }
       i--;
-      Wire.endTransmission();
+      _Wire.endTransmission();
     }
 #ifdef TWBR
     TWBR = twbrbackup;
