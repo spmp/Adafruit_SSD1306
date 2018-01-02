@@ -30,7 +30,7 @@ All text above, and the splash screen below must be included in any redistributi
 
 #include <stdlib.h>
 
-// #include <Wire.h>
+// #include <_Wire.h>
 // #include <SPI.h>
 // #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
@@ -221,62 +221,22 @@ void Adafruit_SSD1306::begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   _vccstate = vccstate;
   _i2caddr = i2caddr;
   
-/** SPI/I2C etc shuld not be the concern of this library! **/
-//   // set pin directions
-//   if (sid != -1){
-//     pinMode(dc, OUTPUT);
-//     pinMode(cs, OUTPUT);
-// #ifdef HAVE_PORTREG
-//     csport      = portOutputRegister(digitalPinToPort(cs));
-//     cspinmask   = digitalPinToBitMask(cs);
-//     dcport      = portOutputRegister(digitalPinToPort(dc));
-//     dcpinmask   = digitalPinToBitMask(dc);
-// #endif
-//     if (!hwSPI){
-//       // set pins for software-SPI
-//       pinMode(sid, OUTPUT);
-//       pinMode(sclk, OUTPUT);
-// #ifdef HAVE_PORTREG
-//       clkport     = portOutputRegister(digitalPinToPort(sclk));
-//       clkpinmask  = digitalPinToBitMask(sclk);
-//       mosiport    = portOutputRegister(digitalPinToPort(sid));
-//       mosipinmask = digitalPinToBitMask(sid);
-// #endif
-//       }
-//     if (hwSPI){
-//       SPI.begin();
-// #ifdef SPI_HAS_TRANSACTION
-//       SPI.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));
-// #else
-//       SPI.setClockDivider (4);
-// #endif
-//     }
-//   }
-//   else
-//   {
-//     // I2C Init
-//     _Wire.begin(0,4,100000);
-// #ifdef __SAM3X8E__
-//     // Force 400 KHz I2C, rawr! (Uses pins 20, 21 for SDA, SCL)
-//     TWI1->TWI_CWGR = 0;
-//     TWI1->TWI_CWGR = ((VARIANT_MCK / (2 * 400000)) - 4) * 0x101;
-// #endif
-//   }
-//   if ((reset) && (rst >= 0)) {
-//     // Setup reset pin direction (used by both SPI and I2C)
-//     pinMode(rst, OUTPUT);
-//     digitalWrite(rst, HIGH);
-//     // VDD (3.3V) goes high at start, lets just chill for a ms
-//     delay(1);
-//     // bring reset low
-//     digitalWrite(rst, LOW);
-//     // wait 10ms
-//     delay(10);
-//     // bring out of reset
-//     digitalWrite(rst, HIGH);
-//     // turn on VCC (9V?)
-//   }
-  _Wire.begin(0,4,100000);
+  /** SPI/I2C etc should not be the concern of this library! **/
+  /** What the HELL is this weird reste pin business, without it the display does not work! **/
+  if ((reset) && (rst >= 0)) {
+    // Setup reset pin direction (used by both SPI and I2C)
+    pinMode(rst, OUTPUT);
+    digitalWrite(rst, HIGH);
+    // VDD (3.3V) goes high at start, lets just chill for a ms
+    delay(1);
+    // bring reset low
+    digitalWrite(rst, LOW);
+    // wait 10ms
+    delay(10);
+    // bring out of reset
+    digitalWrite(rst, HIGH);
+    // turn on VCC (9V?)
+  }
 
   // Init sequence
   ssd1306_command(SSD1306_DISPLAYOFF);                    // 0xAE
