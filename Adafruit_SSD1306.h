@@ -47,6 +47,7 @@ All text above, and the splash screen must be included in any redistribution
 
 #include <SPI.h>
 #include <Adafruit_GFX.h>
+#include <Wire.h>
 
 #define BLACK 0
 #define WHITE 1
@@ -70,30 +71,11 @@ All text above, and the splash screen must be included in any redistribution
     SSD1306_96_16
 
     -----------------------------------------------------------------------*/
-//   #define SSD1306_128_64
-   #define SSD1306_128_32
-//   #define SSD1306_96_16
+#define SSD1306_128_64_ID         0
+#define SSD1306_128_32_ID         1
+#define SSD1306_96_16_ID          2
+
 /*=========================================================================*/
-
-#if defined SSD1306_128_64 && defined SSD1306_128_32
-  #error "Only one SSD1306 display can be specified at once in SSD1306.h"
-#endif
-#if !defined SSD1306_128_64 && !defined SSD1306_128_32 && !defined SSD1306_96_16
-  #error "At least one SSD1306 display must be specified in SSD1306.h"
-#endif
-
-#if defined SSD1306_128_64
-  #define SSD1306_LCDWIDTH                  128
-  #define SSD1306_LCDHEIGHT                 64
-#endif
-#if defined SSD1306_128_32
-  #define SSD1306_LCDWIDTH                  128
-  #define SSD1306_LCDHEIGHT                 32
-#endif
-#if defined SSD1306_96_16
-  #define SSD1306_LCDWIDTH                  96
-  #define SSD1306_LCDHEIGHT                 16
-#endif
 
 #define SSD1306_SETCONTRAST 0x81
 #define SSD1306_DISPLAYALLON_RESUME 0xA4
@@ -143,9 +125,19 @@ All text above, and the splash screen must be included in any redistribution
 
 class Adafruit_SSD1306 : public Adafruit_GFX {
  public:
-  Adafruit_SSD1306(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS);
-  Adafruit_SSD1306(int8_t DC, int8_t RST, int8_t CS);
-  Adafruit_SSD1306(int8_t RST = -1);
+//   Adafruit_SSD1306(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS);
+//   Adafruit_SSD1306(int8_t DC, int8_t RST, int8_t CS);
+//   Adafruit_SSD1306(int8_t RST = -1);
+//   Adafruit_SSD1306(
+//     TwoWire & wire,
+//     uint8_t deviceID, 
+//     int8_t RST
+//   );
+  Adafruit_SSD1306(
+    uint8_t deviceID,
+    int8_t RST
+  );
+//   Adafruit_SSD1306(int8_t RST);
 
   void begin(uint8_t switchvcc = SSD1306_SWITCHCAPVCC, uint8_t i2caddr = SSD1306_I2C_ADDRESS, bool reset=true);
   void ssd1306_command(uint8_t c);
@@ -169,8 +161,16 @@ class Adafruit_SSD1306 : public Adafruit_GFX {
   virtual void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
 
  private:
-  int8_t _i2caddr, _vccstate, sid, sclk, dc, rst, cs;
+  uint8_t* buffer;
+//   TwoWire & _Wire;
+  int8_t 
+    _i2caddr, _vccstate, sid, sclk, dc, rst, cs;
+  const uint8_t
+    _SSD1306_DisplayCommand, _deviceID;
   void fastSPIwrite(uint8_t c);
+  int16_t findWidth(uint8_t deviceInt);
+  int16_t findHeight(uint8_t deviceInt);
+  uint8_t findPageEndCommand(uint8_t deviceInt);
 
   boolean hwSPI;
 #ifdef HAVE_PORTREG
