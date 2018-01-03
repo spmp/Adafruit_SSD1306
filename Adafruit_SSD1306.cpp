@@ -38,7 +38,7 @@ All text above, and the splash screen below must be included in any redistributi
 // the memory buffer for the LCD
 
 // static uint8_t buffer[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8] = {
-  
+
 static uint8_t bufferSmall[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -112,37 +112,7 @@ static uint8_t bufferLarge[] = {
 
 #define ssd1306_swap(a, b) { int16_t t = a; a = b; b = t; }
 
-// the most basic function, set a single pixel
-void Adafruit_SSD1306::drawPixel(int16_t x, int16_t y, uint16_t color) {
-  if ((x < 0) || (x >= width()) || (y < 0) || (y >= height()))
-    return;
-
-  // check rotation, move pixel around if necessary
-  switch (getRotation()) {
-  case 1:
-    ssd1306_swap(x, y);
-    x = WIDTH - x - 1;
-    break;
-  case 2:
-    x = WIDTH - x - 1;
-    y = HEIGHT - y - 1;
-    break;
-  case 3:
-    ssd1306_swap(x, y);
-    y = HEIGHT - y - 1;
-    break;
-  }
-
-  // x is which column
-    switch (color)
-    {
-      case WHITE:   buffer[x+ (y/8)*WIDTH] |=  (1 << (y&7)); break;
-      case BLACK:   buffer[x+ (y/8)*WIDTH] &= ~(1 << (y&7)); break;
-      case INVERSE: buffer[x+ (y/8)*WIDTH] ^=  (1 << (y&7)); break;
-    }
-
-}
-
+// TODO: What do we do about SPI?
 // Adafruit_SSD1306::Adafruit_SSD1306(int8_t SID, int8_t SCLK, int8_t DC, int8_t RST, int8_t CS) : Adafruit_GFX(SSD1306_LCDWIDTH, SSD1306_LCDHEIGHT) {
 //   cs = CS;
 //   rst = RST;
@@ -151,7 +121,7 @@ void Adafruit_SSD1306::drawPixel(int16_t x, int16_t y, uint16_t color) {
 //   sid = SID;
 //   hwSPI = false;
 // }
-// 
+//
 // // constructor for hardware SPI - we indicate DataCommand, ChipSelect, Reset
 // Adafruit_SSD1306::Adafruit_SSD1306(int8_t DC, int8_t RST, int8_t CS) : Adafruit_GFX(SSD1306_LCDWIDTH, SSD1306_LCDHEIGHT) {
 //   dc = DC;
@@ -203,6 +173,8 @@ Adafruit_SSD1306::Adafruit_SSD1306(TwoWire & wire, uint8_t deviceID, int8_t rese
 {
   sclk = dc = cs = sid = -1;
   rst = reset;
+  // TODO: Copy the buffer{Small,Medium,Large} arrays into buffer depending
+  // on device.
 }
 
 Adafruit_SSD1306::Adafruit_SSD1306(uint8_t deviceID, int8_t reset) :
@@ -216,11 +188,10 @@ Adafruit_SSD1306::Adafruit_SSD1306(uint8_t deviceID, int8_t reset) :
   rst = reset;
 }
 
-
 void Adafruit_SSD1306::begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   _vccstate = vccstate;
   _i2caddr = i2caddr;
-  
+
   /** SPI/I2C etc should not be the concern of this library! **/
   /** What the HELL is this weird reste pin business, without it the display does not work! **/
   if ((reset) && (rst >= 0)) {
@@ -258,8 +229,8 @@ void Adafruit_SSD1306::begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   ssd1306_command(0x00);                                  // 0x0 act like ks0108
   ssd1306_command(SSD1306_SEGREMAP | 0x1);
   ssd1306_command(SSD1306_COMSCANDEC);
-  
-  
+
+
   switch(_deviceID) {
     case SSD1306_96_16_ID:
       ssd1306_command(SSD1306_SETCOMPINS);                    // 0xDA
@@ -302,6 +273,37 @@ void Adafruit_SSD1306::begin(uint8_t vccstate, uint8_t i2caddr, bool reset) {
   ssd1306_command(SSD1306_DISPLAYON);//--turn on oled panel
 }
 
+
+// the most basic function, set a single pixel
+void Adafruit_SSD1306::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  if ((x < 0) || (x >= width()) || (y < 0) || (y >= height()))
+    return;
+
+  // check rotation, move pixel around if necessary
+  switch (getRotation()) {
+  case 1:
+    ssd1306_swap(x, y);
+    x = WIDTH - x - 1;
+    break;
+  case 2:
+    x = WIDTH - x - 1;
+    y = HEIGHT - y - 1;
+    break;
+  case 3:
+    ssd1306_swap(x, y);
+    y = HEIGHT - y - 1;
+    break;
+  }
+
+  // x is which column
+    switch (color)
+    {
+      case WHITE:   buffer[x+ (y/8)*WIDTH] |=  (1 << (y&7)); break;
+      case BLACK:   buffer[x+ (y/8)*WIDTH] &= ~(1 << (y&7)); break;
+      case INVERSE: buffer[x+ (y/8)*WIDTH] ^=  (1 << (y&7)); break;
+    }
+
+}
 
 void Adafruit_SSD1306::invertDisplay(uint8_t i) {
   if (i) {
@@ -438,7 +440,7 @@ void Adafruit_SSD1306::display(void) {
 
   ssd1306_command(SSD1306_PAGEADDR);
   ssd1306_command(0); // Page start address (0 = reset)
-  
+
   ssd1306_command(_SSD1306_DisplayCommand); // Page end address
 
   if (sid != -1)
